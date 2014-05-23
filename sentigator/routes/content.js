@@ -14,7 +14,7 @@ var eventStream = require("event-stream");
 var express = require("express");
 
 // Include The 'parser' Module
-var parser = require("../lib/parser");
+var Parser = require("../lib/parser");
 
 // Initialize a new express router
 var router = express.Router();
@@ -27,34 +27,34 @@ router.get("/", function(req, res, next) {
     if (qs.term) {
         async.auto({
             twitxy: function (callback) {
-                var tweets = [];
+                var parser = new Parser();
                 request("http://twitxy.itkoren.com/?lang=en&count=5&term=" + encodeURIComponent(qs.term))
                     .pipe(jsonStream.parse("statuses.*"))
                     .pipe(eventStream.mapSync(function (data) {
-                        parser({
+                        parser.parse({
                             src: "Twitter",
                             text: data.text,
                             score: 0
-                        }, tweets);
+                        });
                     })).on("error", function (e) {
                         // Deal with errors
                         console.error("Got \"twitxy\" error: " + e.message);
                     }).on("end", function () {
                         console.log("End Of Twitter Search Stream");
-                        callback(null, { items: tweets });
+                        callback(null, { items: parser.getItems() });
                     });
             },
             google: function (callback) {
-                var searches = [];
+                var parser = new Parser();
                 var hasUTube = false;
                 request("http://ajax.googleapis.com/ajax/services/search/web?v=1.0&language=en&resultSize=5&q=" + encodeURIComponent(qs.term))
                     .pipe(jsonStream.parse("responseData.results.*"))
                     .pipe(eventStream.mapSync(function (data) {
-                        parser({
+                        parser.parse({
                             src: "Google",
                             text: data.title,
                             score: 0
-                        }, searches);
+                        });
 
                         // Check if in utube
                         if (!hasUTube && -1 !== data.unescapedUrl.indexOf("utube.com")) {
@@ -65,30 +65,30 @@ router.get("/", function(req, res, next) {
                         console.error("Got \"Google\" error: " + e.message);
                     }).on("end", function () {
                         console.log("End Of Google Search Stream");
-                        callback(null, { items: searches, hasUTube: hasUTube });
+                        callback(null, { items: parser.getItems(), hasUTube: hasUTube });
                     });
             },
             utube: ["google", function (callback, results) {
-                var tubes = [];
+                var parser = new Parser();
 
                 if (results.google.hasUTube) {
-                    callback(null, tubes);
+                    callback(null, parser.getItems());
                 }
                 else {
                     request("https://gdata.youtube.com/feeds/api/videos?max-results=5&alt=json&orderby=published&v=2&q=" + encodeURIComponent(qs.term))
                         .pipe(jsonStream.parse("feed.entry.*"))
                         .pipe(eventStream.mapSync(function (data) {
-                            parser({
+                            parser.parse({
                                 src: "UTube",
                                 text: data.title.$t,
                                 score: 0
-                            }, tubes);
+                            });
                         })).on("error", function (e) {
                             // Deal with errors
                             console.error("Got \"UTube\" error: " + e.message);
                         }).on("end", function () {
                             console.log("End Of Utube Search Stream");
-                            callback(null, { items: tubes });
+                            callback(null, { items: parser.getItems() });
                         });
                 }
             }]
