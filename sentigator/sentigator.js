@@ -63,6 +63,9 @@ dmn.run(function() {
     app.set("view engine", "jade");
     app.use(express.static(path.join(__dirname, "public")));
 
+    // Add the responseTime middleware
+    app.use(responseTime());
+
     app.use("/", routes);
     app.use("/content", content);
 
@@ -77,8 +80,6 @@ dmn.run(function() {
             res.send(500, "Something broke!");
         }
     });
-    // Add the responseTime middleware
-    app.use(responseTime());
 
     // Create the HTTP Server
     var server = http.createServer(app).listen(app.get("port"), app.get("ip"), function () {
