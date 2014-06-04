@@ -1,3 +1,6 @@
+// Include The 'sys' Module
+var sys = require("sys");
+
 // Include The 'path' Module
 var path = require("path");
 
@@ -39,9 +42,9 @@ else if ("production" === app.get("env")) {
 app.set("port", process.env.PORT || 8000);
 app.set("ip", process.env.IP || "0.0.0.0");
 
-app.set("views", path.join(__dirname, "views"));
+app.set("views", path.join(__dirname, "..", "views"));
 app.set("view engine", "jade");
-app.use(express.static(path.join(__dirname, "public")));
+app.use(express.static(path.join(__dirname, "..", "public")));
 
 // Add the responseTime middleware
 app.use(responseTime());
