@@ -15,8 +15,7 @@ router.get("/", function(req, res, next) {
         if (err) {
             // Deal with errors
             console.log("Got error: " + err.message);
-            res.writeHead(500);
-            res.end(err.message);
+            res.send(500, err.message);
         }
         else {
             res.json(data);
