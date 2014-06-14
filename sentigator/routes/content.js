@@ -99,14 +99,13 @@ router.get("/", function(req, res, next) {
             // the second function had a shorter timeout.
             if (err) {
                 // Deal with errors
-                console.log("Got error: " + e.message);
-                res.writeHead(500);
-                res.end("** Only Bear Here :) **");
+                console.log("Got error: " + err.message);
+                res.send(500, "** Only Bear Here :) **");
             }
             else {
                 var items = results.twitxy.items.concat(results.google.items, results.utube.items);
-                res.writeHead(200, { "Content-Type": "application/json" });
-                res.end(JSON.stringify(items));
+                res.set({ "Content-Type": "application/json" });
+                res.send(200, items);
             }
         });
     }
@@ -114,8 +113,7 @@ router.get("/", function(req, res, next) {
         // No search term supplied, just return
         console.log("Search failed!");
         console.log("Query parameters are missing");
-        res.writeHead(500);
-        res.end("** Only Bear Here :) **");
+        res.send(500, "** Only Bear Here :) **");
     }
 });
 
