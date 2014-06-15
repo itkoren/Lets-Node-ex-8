@@ -57,7 +57,7 @@ router.get("/", function(req, res, next) {
                         });
 
                         // Check if in utube
-                        if (!hasUTube && -1 !== data.unescapedUrl.indexOf("utube.com")) {
+                        if (!hasUTube && -1 !== data.unescapedUrl.indexOf("youtube.com")) {
                             hasUTube = true;
                         }
                     })).on("error", function (e) {
